@@ -2,6 +2,8 @@
 - name: Crear el directorio de descarga de WP
   become: yes
   command: mkdir -p /opt/source/wordpress
+  args:
+    warn: false
 
 - name: Descargar wordpress
   become: yes
@@ -10,6 +12,8 @@
 - name: Extraer wordpress
   become: yes
   command: "tar xzf /opt/source/wordpress/wordpress.tar.gz -C /var/www/html --strip-components 1"
+  args:
+    warn: false
 
 - name: Eliminar fichero wp-config-sample.php
   become: yes
@@ -20,6 +24,8 @@
 - name: Establecer propietario a /var/www/html/
   become: yes
   shell: chown -R apache:apache /var/www/html/
+  args:
+    warn: false
 
 - name: Copiar fichero wp-config-php
   become: yes

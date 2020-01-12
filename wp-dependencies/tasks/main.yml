@@ -1,0 +1,78 @@
+---
+- name: Actualizar packetes.
+  become: yes
+  yum: name=* state=latest
+  
+- name: Habilitar PHP7.
+  become: yes
+  yum:
+    name: 
+    - epel-release
+    - yum-utils
+    state: present
+  
+- name: Installar el repositorio remi.
+  become: true
+  yum:
+    name: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+    state: present
+ 
+- name: Habilitar remi-php71
+  become: true
+  shell: yum-config-manager --enable remi-php71
+    
+- name: Instalar dependencias para Wordpress
+  become: yes
+  yum:
+    name: 
+    - httpd
+    - mariadb-server
+    - mariadb
+    - php
+    - php-mysql
+    - MySQL-python
+    state: present
+
+- name: Habilitar MYSQL
+  become: yes
+  service: name=mariadb state=started enabled=yes
+
+- name: Copiar ficher ~/.my.cnf a los nodos
+  become: true
+  template: src=.my.cnf dest=/root/.my.cnf owner=root mode=0600
+  
+- name: Reiniciar la configuracion de MSYQL "Reiniciar contraseña"
+  mysql_user:
+    login_user: root
+    login_password: ''
+    name: root
+    host: localhost
+    password: "{{wp_mysql_password}}"
+    
+- name: Crear la base de datos para wordpress
+  mysql_db:
+    login_user: root
+    login_password: "{{wp_mysql_password}}"
+    db: "{{wp_mysql_db}}"
+    state: present    
+
+- name: Crear usuario y contraseña
+  become: true
+  mysql_user:
+    login_user=root
+    login_password="{{wp_mysql_password}}"
+    name="{{ wp_mysql_user }}"
+    password="{{ wp_mysql_password }}"
+    priv=*.*:ALL
+    
+- name: Reiniciar apache
+  become: true
+  service:
+   name: httpd
+   state: restarted
+   
+- name: Reinicar Mysql
+  become: true
+  service: 
+   name: mariadb
+   state: restarted

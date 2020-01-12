@@ -1,0 +1,28 @@
+---
+- name: Crear el directorio de descarga de WP
+  become: yes
+  command: mkdir -p /opt/source/wordpress
+
+- name: Descargar wordpress
+  become: yes
+  get_url: url=https://www.wordpress.org/latest.tar.gz dest=/opt/source/wordpress/wordpress.tar.gz validate_certs=no
+
+- name: Extraer wordpress
+  become: yes
+  command: "tar xzf /opt/source/wordpress/wordpress.tar.gz -C /var/www/html --strip-components 1"
+
+- name: Eliminar fichero wp-config-sample.php
+  become: yes
+  file:
+    path: "/var/www/html/wp-config-sample.php"
+    state: absent
+
+- name: Establecer propietario a /var/www/html/
+  become: yes
+  shell: chown -R apache:apache /var/www/html/
+
+- name: Copiar fichero wp-config-php
+  become: yes
+  template:
+    src: wp-config.php.j2
+    dest: "/var/www/html/wp-config.php"

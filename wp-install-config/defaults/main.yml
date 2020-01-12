@@ -1,0 +1,4 @@
+---
+# Ruta de instalacion de wordpress
+
+wordpress_install_dir: "/var/www/html/"
